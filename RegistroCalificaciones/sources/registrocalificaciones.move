@@ -1,10 +1,10 @@
 module registrocalificaciones::registrocalificaciones {
 
-    use std::string;
-    use sui::vec_map;
-    use sui::object;
-    use sui::tx_context;
-    use sui::transfer;
+    use std::{string};
+    use sui::{vec_map};
+    use sui::{object};
+    use sui::{tx_context};
+    use sui::{transfer};
 
     /* key, store, drop, copy */
 
@@ -26,7 +26,7 @@ module registrocalificaciones::registrocalificaciones {
    const NUMERO_NO_VALIDO:vector<u8> = b"Numero de materia ya existente, intenta con otro";
 
     #[error]
-    const CALIFICACION_NO_VALIDO: u64 = 2;
+    const CALIFICACION_NO_VALIDO: u64 = 444;
 
     public fun crear_registro(nombre: string::String, ctx: &mut tx_context::TxContext) {
         let registro = Registro {
