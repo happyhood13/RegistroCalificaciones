@@ -1,85 +1,73 @@
-module registrocalificaciones::registrocalificaciones{
+module registrocalificaciones::registrocalificaciones {
 
-use std::String::{String,utf8};
-use sui::vec_map::{Vec_map,Self}
+    use std::string;
+    use sui::vec_map;
 
-/*key,store,drop,copy*/
+  /*key store drop*/
+    public struct Registro has key, store {
+        id: object::UID,
+        nombre: string::String,
+        calificaciones: vec_map::VecMap<u8, Calificacion>,
+    }
 
-public struct Registro has key, store{
-    id:UID,
-     nombre:String, 
-    calificacion: VecMap <u8, Calificacion>
-        
+    
+    public struct Calificacion has store, drop {
+        profesor: string::String,
+        materia: string::String,
+        numero: u8,
+        semestre: u8,
+        estado: string::String,
+    }
+
+    #[error]
+    const NUMERO_NO_VALIDO: u64 = 1;
+
+    #[error]
+    const CALIFICACION_NO_VALIDO: u64 = 2;
+
+
+    public fun crear_registro(nombre: string::String, ctx: &mut tx_context::TxContext): Registro {
+        Registro {
+            id: object::new(ctx),
+            nombre,
+            calificaciones: vec_map::empty(),
+        }
+    }
+
+
+    public fun agregar_materia(registro: &mut Registro, profesor: string::String, materia: string::String, numero: u8) {
+        assert!(!vec_map::contains(&registro.calificaciones, &numero), NUMERO_NO_VALIDO);
+
+        let calificacion = Calificacion {
+            profesor,
+            materia,
+            numero,
+            semestre: 0,
+            estado: string::utf8(b"Calificacion Excelente"),
+        };
+
+        vec_map::insert(&mut registro.calificaciones, numero, calificacion);
+    }
+
+    public fun baja_calificacion(registro: &mut Registro, numero: u8, semestre: u8) {
+        assert!(vec_map::contains(&registro.calificaciones, &numero), CALIFICACION_NO_VALIDO);
+
+        let calificacion = vec_map::get_mut(&mut registro.calificaciones, &numero);
+        calificacion.semestre = semestre;
+        calificacion.estado = string::utf8(b"En Baja");
+    }
+
+
+    public fun alta_calificacion(registro: &mut Registro, numero: u8, semestre: u8) {
+        assert!(vec_map::contains(&registro.calificaciones, &numero), CALIFICACION_NO_VALIDO);
+
+        let calificacion = vec_map::get_mut(&mut registro.calificaciones, &numero);
+        calificacion.semestre = semestre;
+        calificacion.estado = string::utf8(b"En Alta");
+    }
+
+    public fun borrar_calificacion(registro: &mut Registro, numero: u8) {
+        assert!(vec_map::contains(&registro.calificaciones, &numero), CALIFICACION_NO_VALIDO);
+        vec_map::remove(&mut registro.calificaciones, &numero);
+    }
 }
-
-public struct Calificacion has store, drop {
-    profesor:String,
-    materia:String,
-    numero:u8,
-    semestre:u8,
-    estado:String,
-   
-}
-
-#[error]
-const NUMERO_NO_VALIDO:vector<u8> = b"Numero de materia ya existente, intenta con otro";
-const CALIFICACION_NO_VALIDO:u16 = 404 ;
-
-public fun crear_registro(nombre:String, ctx: &mut TxContext){
-    let registro=Registro{
-    id: object::new(ctx),
-    nombre,
-    calificacion: vec_map::empty(),
-
- };
-   transfer::transfer(registro,tx_context::sender(ctx))
-
-}
-
-public fun agregar_materias(mut Registro, profesor:String,materia String, numero:u8){
-
-
-assert!(!Registro.Calificacion.contains(&numero), NUMERO_NO_VALIDO);
-
-    let calificacion=Calificacion{
-    profesor,
-    materia,
-    numero,
-    semestre:0,
-    estado:utf8(b"Calificacion Exelente"),
-
-};
-
-}
-
-Registro.calificacion.insert(numero, calificacion);
-
-public fun baja_calificacion(mut Registro,numero:u8,semestre:u8){
-assert!(!Registro.Calificacion.contains(&numero), CALIFICACION_NO_VALIDO);
-
-let cantidad_semestre=Registro.Calificacion.get_mut(&numero).semestre;
-cantidad_semestre=semestre;
-
-let estado_semestre= Registro.Calificacion.get_mut(&numero).semestre;
-estado_semestre=semestre;
-
-}
-
-public fun alta_calificacion(mut Registro,numero:u8){
-assert!(!Registro.Calificacion.contains(&numero), CALIFICACION_NO_VALIDO);
-
-let cantidad_semestre=Registro.Calificacion.get_mut(&numero).semestre;
-cantidad_semestre=semestre;
-
-let estado_semestre= Registro.Calificacion.get_mut(&numero).semestre;
-estado_semestre=utf8(b""En central);
-
-}
-
-public fun borrar_ruta(central:&mut Registro,numero:u8)
-assert!(!Registro.Calificacion.contains(&numero), CALIFICACION_NO_VALIDO);
-
-registro.calificacion.remove(&numero);
-
-}
-
